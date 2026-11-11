@@ -1,0 +1,77 @@
+{
+  "fixture": "sma_crossover_50_200",
+  "signal": "SMA(50) > SMA(200)",
+  "signal_input": "SPY.Close",
+  "parameters": {
+    "instrument": "SPY",
+    "fast_period": 50,
+    "slow_period": 200,
+    "initial_cash": 10000.0,
+    "currency": "USD",
+    "entry": "SMA50 > SMA200, once both are available",
+    "exit": "SMA50 <= SMA200",
+    "warmup_bars_without_signal": 199,
+    "execution": "next available row Open",
+    "equity_mark": "same row Close",
+    "target_weights": [
+      0.0,
+      1.0
+    ],
+    "allow_fractional": false,
+    "rebalance": "signal transitions only; no daily resizing",
+    "entry_quantity": "trunc(account equity at execution Open / execution Open)",
+    "leverage": 1.0,
+    "commission_per_fill": 0.0,
+    "slippage_per_unit": 0.0,
+    "enforce_cash_limit": true,
+    "cash_interest": 0.0,
+    "force_final_liquidation": false,
+    "prices": "Frozen OHLCV snapshot used as supplied; no additional adjustments or dividend cashflows"
+  },
+  "creation_runtime": {
+    "python": "3.14.5",
+    "numpy": "2.4.6",
+    "pandas": "3.0.3",
+    "numba": "0.67.0"
+  },
+  "summary": {
+    "rows": 8318,
+    "start": "1993-01-29",
+    "end": "2026-02-13",
+    "initial_equity": 10000.0,
+    "final_equity": 192479.03462000002,
+    "final_cash": 225.53462000002037,
+    "final_quantity": 282,
+    "fills": 31,
+    "buys": 16,
+    "sells": 15,
+    "first_fill": "1993-11-12"
+  },
+  "validation": {
+    "reference_compiled_parity": "passed: accounts, positions, fills, masks",
+    "max_abs_account_or_position_difference": 0.0,
+    "independent_sma_windows": "passed: all windows",
+    "prefix_signal_causality": "passed: 199, 200, 201, midpoint, penultimate prefixes",
+    "fill_timing_sizing_cash_and_equity_audit": "passed: all bars",
+    "comparison_rtol": 1e-12,
+    "comparison_atol": 1e-09
+  },
+  "file_sha256": {
+    "prices.csv": "7b73c338edc1f9263e6aa65e161c3dd36a93dbfbd009f15adfb0a37f0106c451",
+    "equity.csv": "489f343f3c7898bc9e83f4fa5c4a6662e730d98e66b2f6cdd1cdde8e14ba88b4",
+    "weights.csv": "c8cfe4f1c3b377654c30b573c609a208ef5c234b1a31ebf278c66d513deaedb4",
+    "positions.csv": "cb8c0b5c1305bcb593383c2779c515a89642f47dc22b1e07e574dc6528a6adf4",
+    "signals.csv": "bbf304e66816b9ee1ddd5a5bff56116d82a035e4b2f82251b0a6b7dc3edb0481",
+    "fills.csv": "6542e6e98ac6c99d9575a139341e5cee9d3dbc735b2733d84582a44b1499e18e"
+  },
+  "verification": {
+    "command": "python3 docs/fixtures/verify_fixtures.py",
+    "scope": [
+      "CSV checksums",
+      "date alignment",
+      "summary values",
+      "accounting identities"
+    ],
+    "mode": "Read-only verification of frozen files"
+  }
+}
