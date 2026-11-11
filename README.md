@@ -64,8 +64,9 @@ With Rust and Cargo available in the shell:
 cargo run
 ```
 
-The current Rust program is the initial `Hello, world!` scaffold. The roadmap
-describes the work ahead.
+The program currently calculates an SMA series through the `indicators` module.
+Unit tests live alongside the implementation in `src/indicators.rs`. The roadmap
+describes the remaining backtester work.
 
 To verify the saved fixtures with Python 3 and its standard library:
 
