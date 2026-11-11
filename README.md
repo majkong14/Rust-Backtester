@@ -72,3 +72,21 @@ To verify the saved fixtures with Python 3 and its standard library:
 ```sh
 python3 docs/fixtures/verify_fixtures.py
 ```
+
+## Local commit checks
+
+Enable the repository's pre-commit hook after cloning:
+
+```sh
+git config --local core.hooksPath .githooks
+```
+
+Before each commit, the hook checks formatting, runs offline tests, treats
+Clippy warnings as errors, and checks whitespace in both staged and unstaged
+changes. A failed check blocks the commit.
+
+Run the same checks manually with:
+
+```sh
+.githooks/pre-commit
+```
