@@ -1,8 +1,8 @@
-pub fn sma(prices: &[f64], period: usize) -> Vec<Option<f64>> {
+pub fn sma(prices: &[f64], period: usize) -> Result<Vec<Option<f64>>, &'static str> {
     let mut result: Vec<Option<f64>> = vec![None; prices.len()];
 
     if period == 0 || prices.len() < period {
-        return result;
+        return Err("Period must be bigger or equal to the prices length");
     }
 
     for end in (period - 1)..prices.len() {
@@ -13,7 +13,7 @@ pub fn sma(prices: &[f64], period: usize) -> Vec<Option<f64>> {
         result[end] = Some(mean);
     }
 
-    result
+    Ok(result)
 }
 
 #[cfg(test)]
@@ -28,19 +28,25 @@ mod tests {
     fn sma_calculates_series() {
         assert_eq!(
             sma(&prices_fixture(), 3),
-            vec![None, None, Some(2.0), Some(3.0), Some(4.0)]
-        );
+            Ok(vec![None, None, Some(2.0), Some(3.0), Some(4.0)])
+        )
     }
 
     #[test]
     fn sma_empty_input() {
-        assert_eq!(sma(&[], 3), vec![]);
+        assert_eq!(
+            sma(&[], 3),
+            Err("Period must be bigger or equal to the prices length")
+        );
     }
 
     #[test]
     fn sma_zero_period() {
         let prices = prices_fixture();
-        assert_eq!(sma(&prices, 0), vec![None; prices.len()]);
+        assert_eq!(
+            sma(&prices, 0),
+            Err("Period must be bigger or equal to the prices length")
+        );
     }
 
     #[test]
@@ -48,7 +54,7 @@ mod tests {
         let prices = prices_fixture();
         assert_eq!(
             sma(&prices, 1),
-            vec![Some(1.0), Some(2.0), Some(3.0), Some(4.0), Some(5.0)]
+            Ok(vec![Some(1.0), Some(2.0), Some(3.0), Some(4.0), Some(5.0)])
         );
     }
 
@@ -57,13 +63,16 @@ mod tests {
         let prices = prices_fixture();
         assert_eq!(
             sma(&prices, prices.len()),
-            vec![None, None, None, None, Some(3.0)]
+            Ok(vec![None, None, None, None, Some(3.0)])
         )
     }
 
     #[test]
     fn sma_insuff_price_hist() {
         let prices = prices_fixture();
-        assert_eq!(sma(&prices, prices.len() + 5), vec![None; prices.len()])
+        assert_eq!(
+            sma(&prices, prices.len() + 5),
+            Err("Period must be bigger or equal to the prices length")
+        )
     }
 }
