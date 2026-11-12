@@ -29,6 +29,31 @@ historical execution.
 
 Further stages can be added as the project develops.
 
+## Current state
+
+Stage 1 is in progress. The project currently includes:
+
+- An SMA function returning `Result<Vec<Option<f64>>, &'static str>`.
+- A crossover signal function returning `Result<Vec<bool>, &'static str>`.
+- Interactive terminal input for prices and the two SMA periods.
+- Unit tests for indicator windows, signal changes, warm-up, equality, and
+  invalid periods or insufficient history.
+
+The next step is a procedural backtest loop: execute decisions at the next
+session's open, track cash and whole shares, and calculate equity at the close.
+Portfolio weights, CSV loading, and comparison with the frozen reference
+fixtures follow that step.
+
+## Source layout
+
+```text
+src/
+  main.rs        Terminal input and signal output
+  indicators.rs  SMA calculation and indicator tests
+  signals.rs     SMA crossover decisions and signal tests
+docs/fixtures/   Frozen reference data, trading rules, and a CSV verifier
+```
+
 ## One strategy, one reference result
 
 Every implementation uses the same frozen inputs and trading rules:
@@ -58,15 +83,46 @@ use the documented numerical tolerance.
 
 ## Getting started
 
-With Rust and Cargo available in the shell:
+With Rust and Cargo available in the shell, start the interactive program:
 
 ```sh
-cargo run
+cargo run --offline
 ```
 
-The program currently calculates an SMA series through the `indicators` module.
-Unit tests live alongside the implementation in `src/indicators.rs`. The roadmap
-describes the remaining backtester work.
+Enter three lines:
+
+1. Prices separated by spaces, using a decimal point for fractional values.
+2. The fast SMA period.
+3. The slow SMA period.
+
+For example:
+
+```text
+1 2 3 2 1 2 3
+2
+3
+```
+
+The current output uses Rust's debug representation of `Result`:
+
+```text
+Signals: Ok([false, false, true, true, false, false, true])
+```
+
+Each period must be positive and no greater than the number of input prices.
+The program currently prints calculation errors as `Signals: Err(...)`;
+input parsing and I/O errors are propagated from `main`.
+
+Each signal describes the desired position after that session's close:
+`true` means hold shares, and `false` means hold cash. A missing SMA during
+warm-up produces `false`; equal averages also produce `false`. Execution at
+the following open will be handled by the backtest loop.
+
+Run the Rust unit tests with:
+
+```sh
+cargo test --offline
+```
 
 To verify the saved fixtures with Python 3 and its standard library:
 
