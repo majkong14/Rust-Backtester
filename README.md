@@ -35,20 +35,26 @@ Stage 1 is in progress. The project currently includes:
 
 - An SMA function returning `Result<Vec<Option<f64>>, &'static str>`.
 - A crossover signal function returning `Result<Vec<bool>, &'static str>`.
-- Interactive terminal input for prices and the two SMA periods.
-- Unit tests for indicator windows, signal changes, warm-up, equality, and
-  invalid periods or insufficient history.
+- A functional backtest that applies each signal at the next price observation
+  and returns an equity series.
+- Interactive terminal input for prices, initial cash, leverage, reverse
+  logic, and the two SMA periods.
+- Unit tests for indicator windows, signal changes, warm-up, equality,
+  backtest equity, leverage, reverse logic, no-entry behavior, and a signal on
+  the final observation.
 
-The next step is a procedural backtest loop: execute decisions at the next
-session's open, track cash and whole shares, and calculate equity at the close.
-Portfolio weights, CSV loading, and comparison with the frozen reference
-fixtures follow that step.
+The backtest currently uses one supplied price series for both signal timing
+and valuation. It applies the previous observation's signal at the current
+observation and calculates equity at that same price. Separate open and close
+prices, whole-share accounting, portfolio weights, CSV loading, and comparison
+with the frozen reference fixtures remain to be implemented.
 
 ## Source layout
 
 ```text
 src/
-  main.rs        Terminal input and signal output
+  main.rs        Terminal input, signal calculation, and backtest output
+  backtest.rs    Functional backtest loop and its tests
   indicators.rs  SMA calculation and indicator tests
   signals.rs     SMA crossover decisions and signal tests
 docs/fixtures/   Frozen reference data, trading rules, and a CSV verifier
@@ -89,34 +95,40 @@ With Rust and Cargo available in the shell, start the interactive program:
 cargo run --offline
 ```
 
-Enter three lines:
+Enter the requested values, one per line:
 
 1. Prices separated by spaces, using a decimal point for fractional values.
-2. The fast SMA period.
-3. The slow SMA period.
+2. Initial cash.
+3. Leverage, greater than zero.
+4. Reverse logic: `Y` or `N` (case-insensitive).
+5. The fast SMA period.
+6. The slow SMA period.
 
 For example:
 
 ```text
 1 2 3 2 1 2 3
+10000
+1
+n
 2
 3
 ```
 
-The current output uses Rust's debug representation of `Result`:
-
-```text
-Signals: Ok([false, false, true, true, false, false, true])
-```
+The program prints the calculated signals and the backtest result using Rust's
+debug formatting (for example, `Equity: Ok([...])`). Input parsing and I/O
+errors are propagated from `main`; invalid reverse-logic input returns an
+error. Signal-construction errors currently cause a panic through `expect`.
 
 Each period must be positive and no greater than the number of input prices.
-The program currently prints calculation errors as `Signals: Err(...)`;
-input parsing and I/O errors are propagated from `main`.
 
 Each signal describes the desired position after that session's close:
 `true` means hold shares, and `false` means hold cash. A missing SMA during
-warm-up produces `false`; equal averages also produce `false`. Execution at
-the following open will be handled by the backtest loop.
+warm-up produces `false`; equal averages also produce `false`. The current
+prototype applies the signal at the next price observation; until separate
+Open prices are loaded, that observation is the execution and valuation price.
+Reverse logic multiplies the position return by `-1.0` while preserving the
+same signal-entry and exit timing.
 
 Run the Rust unit tests with:
 
