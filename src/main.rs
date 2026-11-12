@@ -1,14 +1,34 @@
 mod indicators;
+mod signals;
 
-use indicators::sma;
+use signals::sma_crossover;
+use std::error::Error;
+use std::io;
 
-fn main() {
-    let prices = [1.0, 2.0, 3.0, 4.0, 5.0];
+fn main() -> Result<(), Box<dyn Error>> {
+    let mut input = String::new();
 
-    assert_eq!(sma(&[1.0, 2.0], 3), Ok(vec![None; 2]));
-    assert_eq!(sma(&prices, 0), Ok(vec![None; prices.len()]));
+    println!("Enter prices, space-denominated:");
+    io::stdin().read_line(&mut input)?;
 
-    println!("{:?}", sma(&prices, 3));
-    println!("{:?}", sma(&prices, 10));
-    println!("{:?}", sma(&prices, 0));
+    let mut prices = Vec::new();
+
+    for value in input.split_whitespace() {
+        prices.push(value.parse::<f64>()?);
+    }
+
+    input.clear();
+    println!("Enter fast MA period:");
+    io::stdin().read_line(&mut input)?;
+    let fast_period = input.trim().parse::<usize>()?;
+
+    input.clear();
+    println!("Enter slow MA period:");
+    io::stdin().read_line(&mut input)?;
+    let slow_period = input.trim().parse::<usize>()?;
+
+    let result = sma_crossover(&prices, fast_period, slow_period);
+    println!("Signals: {result:?}");
+
+    Ok(())
 }
