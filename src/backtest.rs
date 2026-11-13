@@ -108,10 +108,8 @@ mod tests {
         let actual_eq = backtest(prices, signals, initial_cash, leverage, reversed_logic);
 
         match actual_eq {
-            Ok(_) => {}
-            Err(error) => {
-                assert_eq!(error, expected_err);
-            }
+            Ok(_) => panic!("expected an error: {expected_err}"),
+            Err(error) => assert_eq!(error, expected_err),
         }
     }
 
